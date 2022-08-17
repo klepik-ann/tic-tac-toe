@@ -3,7 +3,7 @@
 const cellList = document.querySelectorAll('.cell');
 
 const gameStatus = document.querySelector('.game--status');
-let restartGame = document.querySelector('.game--restart');
+let restartGame = document.querySelector('.game--restart');//сброс
 let currentUser = 'X';
 let activeGame = true;
 let gameState = ["", "", "", "", "", "", "", "", ""];
@@ -19,52 +19,62 @@ const winningLines = [
 	[2, 4, 6]
 ];
 
+//находим нового активного пользователя
+function handlePlayerChange() {
+	currentUser === 'X' ? currentUser = 'O' : currentUser = 'X';
+	gameStatus.innerHTML = `It's ${currentUser}'s turn`;
+
+};
+
+
+//Валидируем результаты игры
+function handleResultValidation() {
+	for (let i = 0; i <= winningLines.length - 1; i++) {
+		const winCondition = winningLines[i];
+		const a = gameState[winCondition[0]];
+		const b = gameState[winCondition[1]];
+		const c = gameState[winCondition[2]];
+
+		if (a == "" || b == "" || c == "") {
+			continue
+		} else if (a === b && b === c) {
+			gameStatus.textContent = `Player ${currentUser} has won!`;
+			activeGame = false;
+			return;
+		}
+		break;
+	}
+
+	if (!gameState.includes("")) {
+		gameStatus.textContent = `Game ended in a draw!`;
+		activeGame = false;
+		return;
+	};
+	handlePlayerChange();
+};
 
 function handleCellClick(event) {
 	const indexOfCell = event.target.dataset.cellIndex;
-	console.log(indexOfCell);
+
 	if (!activeGame || gameState[indexOfCell] !== "") {
 		return;
 	}
 	gameState[indexOfCell] = currentUser;
 	cellList[indexOfCell].textContent = currentUser;
-	handlePlayerChange();
-}
-function handlePlayerChange() {
-	currentUser === 'X' ? currentUser = 'O' : currentUser = 'X';
-	gameStatus.innerHTML = `It's ${currentUser}'s turn`;
-}
 
-document.querySelectorAll('.cell').forEach(cellList => cellList.addEventListener('click', handleCellClick)
-);
+	handleResultValidation();
+};
 
-
-
-// function checkWinningLines() {
-// 	for (let i = 0; i <= winningLines.length - 1; i++) {
-// 		const winCondition = winningLines[i];
-// 		const a = gameState[winCondition[0]];
-// 		const b = gameState[winCondition[1]];
-// 		const c = gameState[winCondition[2]];
-
-// 		if (a == "" || b == "" || c == "") {
-// 			continue
-// 		}
-// 		if (a === b $$ b == c) {
-// 			gameStatus.innerHTML = `Player ${currentUser} has won!`;
-// 			activeGame = false;
-// 			break;
-// 		}
-// 	}
-// 	handlePlayerChange();
-// 	if (gameState.includes("")) {
-// 		gameStatus.innerHTML = `Game ended in a draw!`;
-// 		activeGame = false;
-// 	}
-// };
+//обнуляем все переменные и контент в разметке
+function handleRestartGame(event) {
+	event.preventDefault();
+	activeGame = true;
+	gameState = ["", "", "", "", "", "", "", "", ""];
+	currentUser = 'X';
+	gameStatus.textContent = `It's ${currentUser}'s turn`;
+	cellList.forEach(element => element.textContent = '');
+};
 
 
-
-
-
-
+document.querySelectorAll('.cell').forEach(cellList => cellList.addEventListener('click', handleCellClick));
+document.querySelector('.game--restart').addEventListener('click', handleRestartGame);
